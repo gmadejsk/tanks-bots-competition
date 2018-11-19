@@ -21,7 +21,7 @@ class Tank {
 		this.accelerationX = 0;
 		this.accelerationY = 0;
 		this.shootCooldown = 0;
-
+		this.maxCooldown = 100;
 	
 	}
 	
@@ -75,7 +75,7 @@ class Tank {
 			this.cannon.bitmap.rotation += 1.5;
 		}
 		if (shoot==1 && this.shootCooldown==0){
-			this.shootCooldown=100;
+			this.shootCooldown=this.maxCooldown;
 
 			if (this.type == 0){				
 				var bullet = new Bullet(this.stage,"bulletBrown.png",this.bitmap.x+21*Math.cos(this.cannon.bitmap.rotation*Math.PI/180),this.bitmap.y+21*Math.sin(this.cannon.bitmap.rotation*Math.PI/180),this.cannon.bitmap.rotation);
