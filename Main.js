@@ -1,11 +1,19 @@
 const MAP_WIDTH = 500;
 const MAP_HEIGHT = 500;
 
+const GAME_TIME_LIMIT = 40000;
+const SUDDEN_DEATH_TIME = 20000;
+
 var stage = new createjs.Stage("tanksCanvas");
 stage.updatableObjects = [];
 var startText;
+var timeText;
 
 var bg;
+
+
+var currentGameTime = 0;
+var startTimestamp;
 
 var bgIm = new Image();	
 
@@ -83,6 +91,13 @@ var KEYCODE_LEFT = 37,
 	stage.addChild(startText);
 	
 	
+	// welcome text
+	timeText = new createjs.Text("Game time: "+Math.round(GAME_TIME_LIMIT/10.0)/100.0, "16px Arial", "#000000");
+	timeText.x = 40;
+	timeText.y=520;
+	timeText.textBaseline = "alphabetic";
+	stage.addChild(timeText);
+
 	/*Background Image*/
 
 	bgIm.src = "snow.jpg";
@@ -109,6 +124,24 @@ var KEYCODE_LEFT = 37,
 
 function tick(event) { 
 	if (gameStatus == 1){
+		//time refresh
+		currentGameTime = Date.now()-startTimestamp;
+		timeText.text = "Game time: "+Math.max(0.00,Math.round((GAME_TIME_LIMIT-currentGameTime)/10.0)/100.0);
+
+		//sudden death time
+		if(currentGameTime>=SUDDEN_DEATH_TIME){
+			rearmTanks(tankBrown,tankGreen);
+		}
+
+		//end time - the middle tank wins
+		if(currentGameTime>=GAME_TIME_LIMIT){
+			if (getTankNearestToMiddle(tankBrown, tankGreen) == null) {
+				endGame(null);
+			} else {
+				endGame(tankBrown === getTankNearestToMiddle(tankBrown,tankGreen) ? tankGreen : tankBrown);
+			}			
+		}
+
 		//controll brown tank by keys or with script
 		if(document.getElementById("controll-brown").checked) {
 			var ctrl = new Proxy(scriptControlls[0], handler); //proxy all not set properties to default value of "0"
@@ -172,6 +205,7 @@ function tick(event) {
 function startGame(){
 	if (gameStatus==0) { 
 		gameStatus =1; 
+		startTimestamp = Date.now();
 		stage.removeChild(startText);
 	}
 
@@ -208,8 +242,13 @@ function startGame(){
 
 function endGame(playerDead){
 	gameStatus = 2;
-	var winner = playerDead == 0 ? "Green" : "Brown";
-	var text = new createjs.Text("Game Over! "+winner+" tank wins!", "20px Arial", "#000000");
+	var text;
+	if (playerDead === null) {
+		text = new createjs.Text("Game Over! Game ends in a draw!", "20px Arial", "#000000");
+	} else {
+		var winner = playerDead == 0 ? "Green" : "Brown";
+		text = new createjs.Text("Game Over! "+winner+" tank wins!", "20px Arial", "#000000");
+	}
 	text.x = 100;
 	text.y=250;
 	text.textBaseline = "alphabetic";
@@ -294,7 +333,7 @@ function getParams(tank, enemyTank, bullets, enemyBullets){
 
 	var brownTank = data.myTank;
 	var greenTank = data.enemyTank;
-	if(tank.type === 1) {
+	if (tank.type === 1) {
 		brownTank = data.enemyTank;
 		greenTank = data.myTank;
 	}
@@ -316,7 +355,42 @@ function getParams(tank, enemyTank, bullets, enemyBullets){
 	greenTank.controls.shoot = keys[KEYCODE_SHOOT2];
 	greenTank.controls.cannonLeft = keys[KEYCODE_CLEFT2];
 	greenTank.controls.cannonRight = keys[KEYCODE_CRIGHT2];
-
+	
 	return data;
 }
 
+function getTankNearestToMiddle(tank1, tank2) {
+	var distTank1 = Math.sqrt(
+			Math.pow((tank1.bitmap.x - MAP_WIDTH / 2), 2) + 
+			Math.pow((tank1.bitmap.y - MAP_HEIGHT / 2), 2)
+		);
+	var distTank2 = Math.sqrt(
+			Math.pow((tank2.bitmap.x - MAP_WIDTH / 2), 2) + 
+			Math.pow((tank2.bitmap.y - MAP_HEIGHT / 2), 2)
+		);
+	if (distTank1 > distTank2) {
+		return tank2;
+	}
+	if (distTank2 > distTank1) {
+		return tank1;
+	}
+	return null;
+}
+
+
+/**
+ * function will boost one tank (nearer to the middle) and reset the second one to base values
+ * @param Tank tank1 
+ * @param Tank tank2 
+ */
+function rearmTanks(tank1, tank2) {
+	var tankMiddle = getTankNearestToMiddle(tank1, tank2);
+	if (tankMiddle == null) {
+		tank1.maxCooldown = 100;
+		tank2.maxCooldown = 100;
+	} else {
+		var tankFarAway = tankMiddle === tank1 ? tank2 : tank1;
+		tankMiddle.maxCooldown = 50;
+		tankFarAway.maxCooldown = 100;
+	}
+}
