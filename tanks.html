@@ -1,0 +1,28 @@
+<!DOCTYPE html> 
+<html> 
+    <head> 
+        <title>Tank Trouble</title> 
+          <link rel="icon" type="image/png" href="favicon.png">
+        <style>*{-webkit-tap-highlight-color: rgba(0, 0, 0, 0);}</style> 
+  
+        <script src="easel.js"></script> 
+        <script src="tween.js"></script> 
+        <script src="sound.js"></script> 
+        
+  
+    </head> 
+    <body onload="Main();">
+        <canvas id="tanksCanvas" width="500" height="550" onclick="startGame();" style="float:left;"></canvas> 
+        <p>Brown:</p>
+        <input type="checkbox" name="script-controll" id="controll-brown">
+        <textarea id="brown-script"></textarea>
+        <p>Green:</p>
+        <input type="checkbox" name="script-controll" id="controll-green">
+        <textarea id="green-script"></textarea>
+    </body>
+    
+	<script src="cannon.js"></script> 
+	<script src="tank.js"></script> 
+	<script src="bullet.js"></script> 
+	<script src="Main.js"></script> 
+</html>
