@@ -1,7 +1,9 @@
 <!DOCTYPE html> 
 <html> 
     <head> 
-        <title>Tank Trouble</title> 
+        <title>Tankorithms</title> 
+        <meta name="description" content="Tankorithms - a small javascript game with an option to use AI (bots) to control the tanks.">
+        <meta name="keywords" content="tanks, game, bots, ai, neural network">
           <link rel="icon" type="image/png" href="favicon.png">
         <style>*{-webkit-tap-highlight-color: rgba(0, 0, 0, 0);}</style> 
   
@@ -12,13 +14,80 @@
   
     </head> 
     <body onload="Main();">
-        <canvas id="tanksCanvas" width="500" height="550" onclick="startGame();" style="float:left;"></canvas> 
-        <p>Brown:</p>
-        <input type="checkbox" name="script-controll" id="controll-brown">
-        <textarea id="brown-script"></textarea>
-        <p>Green:</p>
-        <input type="checkbox" name="script-controll" id="controll-green">
-        <textarea id="green-script"></textarea>
+        <div><canvas id="tanksCanvas" width="500" height="550" onclick="startGame();"></canvas> </div>
+        <dic style="clear:both"/>
+        <div><h3>Controls</h3>
+        
+        <div style="background:#ffe5cc;">
+        <p>Brown</p>
+        <p>
+                <input type="checkbox" name="script-controll" id="controll-brown"> Check the box to switch control to bot.<br>
+        </p>
+        <p>
+            Player controls: QWE/D/F/G/R
+        </p>
+        <p>Bot control function<br/>
+        <span style="font-size: 0.5em;"></span>Extract the parameteres for two tanks from "e". These are: x, y, rotation, cannonRotation, velocityX, velocityY, accelerationX, accelerationY, shootCooldown.<br/>
+        Control your tank by constructing a "response" object which tells what actions to take: turnLeft,turnRight, goForward, goBack,shoot, cannonLeft, cannonRight.<br/></span>
+        <textarea id="brown-script" rows="7" cols="65">
+                function(e) {    	
+                    var response = {};
+                     
+                    if (e.data.currentGameTime>20000) {
+                        response.cannonLeft = 1;
+                        response.goForward = 1; 
+                    } else {
+                        response.cannonRight = 1;
+                        response.goBack = 1; 
+                    }                                 
+                    if(e.data.myTank.shootCooldown == 0) {
+                        response.shoot = 1;
+                    }
+                    self.postMessage(response);
+                }
+        </textarea></p>
+
+        <div style="background:#9F9;">
+        <p>Green</p>
+        <p>
+        <input type="checkbox" name="script-controll" id="controll-green"> Check the box to switch control to bot.<br>
+        </p>
+        <p>Player controls: L;'/LEFT/DOWN/RIGHT/UP</p>
+        <p>Bot control function:<br/>
+        <span style="font-size: 0.5em;"></span>Extract the parameteres for two tanks from "e". These are: x, y, rotation, cannonRotation, velocityX, velocityY, accelerationX, accelerationY, shootCooldown.<br/>
+        Control your tank by constructing a "response" object which tells what actions to take: turnLeft,turnRight, goForward, goBack,shoot, cannonLeft, cannonRight.<br/></span>
+        <textarea id="green-script" rows="7" cols="65">
+                function(e) {    	
+                    var response = {};
+                    response.goForward = 1;
+                    if  (e.data.currentGameTime % 2000>1000)   {
+                        response.turnLeft = 1;
+                    }   
+                    if  (500>e.data.currentGameTime % 2000)   {
+                        response.turnRight = 1;
+                    }        
+                    response.cannonLeft = 1;
+                    if(e.data.myTank.shootCooldown == 0) {
+                        response.shoot = 1;
+                    }
+                    self.postMessage(response);
+                }
+        </textarea></p>
+        </div>
+    </div>
+        
+        
+        <div><h3>Rules</h3>
+        <ol>
+            <li>The aim of the game is to shoot down the enemy tank within 40 seconds.</li>
+            <li>After 20 seconds, the tank which is nearer to the center gets a 2x speed shooting bonus.</li>
+            <li>After 40 seconds, the game ends. If no tank was shot down, then the tank nearer to the center wins.</li>
+        </ol>
+        </div>
+        <!--<div><h3>Game data</h3>
+<textarea id="data-logs" rows="10" cols="120">myTank.x,myTank.y,myTank.rotation,myTank.cannonRotation,myTank.velocityX,myTank.velocityY,myTank.accelerationX,myTank.accelerationY,myTank.shootCooldown,myTank.controls.turnLeft,myTank.controls.turnRight,myTank.controls.goForward,myTank.controls.goBack,myTank.controls.shoot,myTank.controls.cannonLeft,myTank.controls.cannonRight,enemyTank.x,enemyTank.y,enemyTank.rotation,enemyTank.cannonRotation,enemyTank.velocityX,enemyTank.velocityY,enemyTank.accelerationX,enemyTank.accelerationY,enemyTank.shootCooldown,data.currentGameTime
+</textarea></div>-->
+        </div>
     </body>
     
 	<script src="cannon.js"></script> 

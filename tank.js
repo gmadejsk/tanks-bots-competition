@@ -22,6 +22,7 @@ class Tank {
 		this.accelerationY = 0;
 		this.shootCooldown = 0;
 		this.maxCooldown = 100;
+		this.bulletList = [];
 	
 	}
 	
@@ -76,16 +77,23 @@ class Tank {
 		}
 		if (shoot==1 && this.shootCooldown==0){
 			this.shootCooldown=this.maxCooldown;
-
+			var bullet;
 			if (this.type == 0){				
-				var bullet = new Bullet(this.stage,"bulletBrown.png",this.bitmap.x+21*Math.cos(this.cannon.bitmap.rotation*Math.PI/180),this.bitmap.y+21*Math.sin(this.cannon.bitmap.rotation*Math.PI/180),this.cannon.bitmap.rotation);
+				bullet = new Bullet(this.stage,"bulletBrown.png",this.bitmap.x+21*Math.cos(this.cannon.bitmap.rotation*Math.PI/180),this.bitmap.y+21*Math.sin(this.cannon.bitmap.rotation*Math.PI/180),this.cannon.bitmap.rotation);
 			} else {
-				var bullet = new Bullet(this.stage,"bulletGreen.png",this.bitmap.x+21*Math.cos(this.cannon.bitmap.rotation*Math.PI/180),this.bitmap.y+21*Math.sin(this.cannon.bitmap.rotation*Math.PI/180),this.cannon.bitmap.rotation);
+				bullet = new Bullet(this.stage,"bulletGreen.png",this.bitmap.x+21*Math.cos(this.cannon.bitmap.rotation*Math.PI/180),this.bitmap.y+21*Math.sin(this.cannon.bitmap.rotation*Math.PI/180),this.cannon.bitmap.rotation);
 			}
+			this.bulletList.push(bullet);
+			
 		}
 		
 	}
 	
+	updateBulletList(width,height){
+		this.bulletList = this.bulletList.filter((object)=>(object.bitmap.x<=width && object.bitmap.y<=height && object.bitmap.x>=0 && object.bitmap.y>=0));
+		
+	}
+
 	updateSpeed(){
 		this.velocity += this.acceleration;
 		this.velocityX += this.accelerationX;
