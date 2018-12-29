@@ -49,4 +49,7 @@ class Bullet {
 		}
 		this.stage.removeChild(this.bitmap);
 	}
+	removeDirect(){
+		this.stage.removeChild(this.bitmap);
+	}
 }

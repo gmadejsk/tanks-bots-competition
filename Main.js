@@ -8,6 +8,7 @@ var stage = new createjs.Stage("tanksCanvas");
 stage.updatableObjects = [];
 var startText;
 var timeText;
+var endText;
 
 var bg;
 
@@ -161,7 +162,7 @@ function tick(event) {
 			if (getTankNearestToMiddle(tankBrown, tankGreen) == null) {
 				endGame(null);
 			} else {
-				endGame(tankBrown === getTankNearestToMiddle(tankBrown,tankGreen) ? tankGreen : tankBrown);
+				endGame(tankBrown === getTankNearestToMiddle(tankBrown,tankGreen) ? tankGreen.type : tankBrown.type);
 			}			
 		}
 
@@ -244,52 +245,55 @@ function startGame(){
 		gameStatus =1; 
 		startTimestamp = Date.now();
 		stage.removeChild(startText);
-	}
+	
 
-	// set green tank to be controlled by script
- 	if (document.getElementById("controll-green").checked) {
-		var blobURL = URL.createObjectURL( new Blob([
-			'(function(){self.onmessage = ',
-			document.getElementById("green-script").value,
-			'})()' 
-		], { type: 'application/javascript' }));
-		greenWorker = new Worker(blobURL);
-		greenWorker.onmessage = function(e){
-			//console.log("Green worker reply:");
-			//console.log(e);
-			setControlls(1, e.data);
+		// set green tank to be controlled by script
+		if (document.getElementById("controll-green").checked) {
+			var blobURL = URL.createObjectURL( new Blob([
+				'(function(){self.onmessage = ',
+				document.getElementById("green-script").value,
+				'})()' 
+			], { type: 'application/javascript' }));
+			greenWorker = new Worker(blobURL);
+			greenWorker.onmessage = function(e){
+				//console.log("Green worker reply:");
+				//console.log(e);
+				setControlls(1, e.data);
+			}
 		}
-	}
 
-	// set brown tank to be controlled by script
-	if (document.getElementById("controll-brown").checked) {
-		var blobURL = URL.createObjectURL( new Blob([
-			'(function(){self.onmessage = ',
-			document.getElementById("brown-script").value,
-			'})()' 
-		], { type: 'application/javascript' }));
-		brownWorker = new Worker(blobURL);
-		brownWorker.onmessage = function(e){
-			//console.log("Brown worker reply:");
-			//console.log(e);
-			setControlls(0, e.data);
+		// set brown tank to be controlled by script
+		if (document.getElementById("controll-brown").checked) {
+			var blobURL = URL.createObjectURL( new Blob([
+				'(function(){self.onmessage = ',
+				document.getElementById("brown-script").value,
+				'})()' 
+			], { type: 'application/javascript' }));
+			brownWorker = new Worker(blobURL);
+			brownWorker.onmessage = function(e){
+				//console.log("Brown worker reply:");
+				//console.log(e);
+				setControlls(0, e.data);
+			}
 		}
+
+	} else {
+		restartGame();
 	}
 }
 
 function endGame(playerDead){
 	gameStatus = 2;
-	var text;
 	if (playerDead === null) {
-		text = new createjs.Text("Game Over! Game ends in a draw!", "20px Arial", "#000000");
+		endText = new createjs.Text("Game Over! Game ends in a draw! \nClick to restart the game.", "20px Arial", "#000000");
 	} else {
 		var winner = playerDead == 0 ? "Green" : "Brown";
-		text = new createjs.Text("Game Over! "+winner+" tank wins!", "20px Arial", "#000000");
+		endText = new createjs.Text("Game Over! "+winner+" tank wins! \nClick to restart the game.", "20px Arial", "#000000");
 	}
-	text.x = 100;
-	text.y=250;
-	text.textBaseline = "alphabetic";
-	stage.addChild(text);
+	endText.x = 100;
+	endText.y=250;
+	endText.textBaseline = "alphabetic";
+	stage.addChild(endText);
 }
 
 function setControlls(tankType, controlls) {
@@ -327,6 +331,8 @@ function printParameters(tank, enemyTank, bullets, enemyBullets){
 		data.myTank.controls.cannonRight = keys[KEYCODE_CRIGHT] || script_keys[613];
 	}
 	
+
+
 	
 	data.myTank.bullets = bullets.filter((element)=>(element.bitmap!=null)).map(function(b) {
 			return {x: b.bitmap.x, y: b.bitmap.y, velocityX: b.velocityX, velocityY: b.velocityY};
@@ -489,30 +495,48 @@ function getParams(tank, enemyTank, bullets, enemyBullets){
 	data.currentGameTime = currentGameTime;
 
 	var brownTank = data.myTank;
-	//var greenTank = data.enemyTank;
+	var greenTank = data.enemyTank;
 	if (tank.type === 1) {
-		//brownTank = data.enemyTank;
+		brownTank = data.enemyTank;
 		greenTank = data.myTank;
 	}
 
 	brownTank.controls = {};
-	brownTank.controls.turnLeft = keys[KEYCODE_LEFT] || script_keys[0];
-	brownTank.controls.turnRight = keys[KEYCODE_RIGHT] || script_keys[1];
-	brownTank.controls.goForward = keys[KEYCODE_UP] || script_keys[2];
-	brownTank.controls.goBack = keys[KEYCODE_DOWN] || script_keys[3];
-	brownTank.controls.shoot = keys[KEYCODE_SHOOT] || script_keys[4]; 
-	brownTank.controls.cannonLeft = keys[KEYCODE_CLEFT] || script_keys[5];
-	brownTank.controls.cannonRight = keys[KEYCODE_CRIGHT] || script_keys[6];
-
+	if(document.getElementById("controll-brown").checked) {
+		brownTank.controls.turnLeft = script_keys[0];
+		brownTank.controls.turnRight = script_keys[1];
+		brownTank.controls.goForward = script_keys[2];
+		brownTank.controls.goBack = script_keys[3];
+		brownTank.controls.shoot = script_keys[4]; 
+		brownTank.controls.cannonLeft = script_keys[5];
+		brownTank.controls.cannonRight = script_keys[6];
+	} else {
+		brownTank.controls.turnLeft = keys[KEYCODE_LEFT];
+		brownTank.controls.turnRight = keys[KEYCODE_RIGHT];
+		brownTank.controls.goForward = keys[KEYCODE_UP];
+		brownTank.controls.goBack = keys[KEYCODE_DOWN];
+		brownTank.controls.shoot = keys[KEYCODE_SHOOT]; 
+		brownTank.controls.cannonLeft = keys[KEYCODE_CLEFT];
+		brownTank.controls.cannonRight = keys[KEYCODE_CRIGHT];
+	}
 	greenTank.controls = {};
-	greenTank.controls.turnLeft = keys[KEYCODE_LEFT2] || script_keys[7];
-	greenTank.controls.turnRight = keys[KEYCODE_RIGHT2] || script_keys[8];
-	greenTank.controls.goForward = keys[KEYCODE_UP2] || script_keys[9];
-	greenTank.controls.goBack = keys[KEYCODE_DOWN2] || script_keys[10];
-	greenTank.controls.shoot = keys[KEYCODE_SHOOT2] || script_keys[11];
-	greenTank.controls.cannonLeft = keys[KEYCODE_CLEFT2] || script_keys[12];
-	greenTank.controls.cannonRight = keys[KEYCODE_CRIGHT2] || script_keys[13];
-	
+	if(document.getElementById("controll-green").checked) {
+		greenTank.controls.turnLeft = script_keys[7];
+		greenTank.controls.turnRight = script_keys[8];
+		greenTank.controls.goForward = script_keys[9];
+		greenTank.controls.goBack = script_keys[10];
+		greenTank.controls.shoot = script_keys[11];
+		greenTank.controls.cannonLeft = script_keys[12];
+		greenTank.controls.cannonRight = script_keys[13];
+	} else {
+		greenTank.controls.turnLeft = keys[KEYCODE_LEFT2];
+		greenTank.controls.turnRight = keys[KEYCODE_RIGHT2];
+		greenTank.controls.goForward = keys[KEYCODE_UP2];
+		greenTank.controls.goBack = keys[KEYCODE_DOWN2];
+		greenTank.controls.shoot = keys[KEYCODE_SHOOT2];
+		greenTank.controls.cannonLeft = keys[KEYCODE_CLEFT2];
+		greenTank.controls.cannonRight = keys[KEYCODE_CRIGHT2];
+	}
 	return data;
 }
 
@@ -552,3 +576,71 @@ function rearmTanks(tank1, tank2) {
 	}
 }
 
+function restartGame(){
+	if (gameStatus==2) { //gameEnded
+		greenWorker=null;
+		brownWorker=null;
+		stage.removeChild(endText);
+		stage.updatableObjects.forEach(function(object) {
+			object.removeDirect();
+		});
+		
+		bulletsBrown = [];
+		bulletsGreen = [];
+		stage.updatableObjects = [];
+		scriptControlls = {0:{}, 1:{}};
+		script_keys = {0:0,
+			1:0,
+			2:0, 
+			3:0,	
+			4:0,
+			5:0,
+			6:0,
+			//tank green
+			7:0,
+			8:0,
+			9:0,
+			10:0,
+			11:0,
+			12:0,
+			13:0	
+		};
+		if (document.getElementById("controll-green").checked) {
+			var blobURL = URL.createObjectURL( new Blob([
+				'(function(){self.onmessage = ',
+				document.getElementById("green-script").value,
+				'})()' 
+			], { type: 'application/javascript' }));
+			greenWorker = new Worker(blobURL);
+			greenWorker.onmessage = function(e){
+				//console.log("Green worker reply:");
+				//console.log(e);
+				setControlls(1, e.data);
+			}
+		}
+	
+		// set brown tank to be controlled by script
+		if (document.getElementById("controll-brown").checked) {
+			var blobURL = URL.createObjectURL( new Blob([
+				'(function(){self.onmessage = ',
+				document.getElementById("brown-script").value,
+				'})()' 
+			], { type: 'application/javascript' }));
+			brownWorker = new Worker(blobURL);
+			brownWorker.onmessage = function(e){
+				//console.log("Brown worker reply:");
+				//console.log(e);
+				setControlls(0, e.data);
+			}
+		}
+	
+		var randx = Math.round(Math.random())*400+50; 
+		var randy = Math.floor(50+Math.random() * 400);
+		tankBrown = new Tank(stage,"tankBrown.png","cannonBrown.png",randx,randy);
+		tankGreen = new Tank(stage,"tankGreen.png","cannonGreen.png",(400+randx)%800,500-randy);
+		currentGameTime = 0;
+		startTimestamp = Date.now();
+		gameStatus =1; 
+		stage.update();
+	}
+}

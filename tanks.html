@@ -16,7 +16,9 @@
     <body onload="Main();">
         <div><canvas id="tanksCanvas" width="500" height="550" onclick="startGame();"></canvas> </div>
         <dic style="clear:both"/>
-        <div><h3>Controls</h3>
+        <p><button onclick="myFunction()">Show/Hide Controls</button></p>
+
+        <div id="myDIV"><h3>Controls</h3>
         
         <div style="background:#ffe5cc;">
         <p>Brown</p>
@@ -24,7 +26,7 @@
                 <input type="checkbox" name="script-controll" id="controll-brown"> Check the box to switch control to bot.<br>
         </p>
         <p>
-            Player controls: QWE/D/F/G/R
+            Player controls: L;'/LEFT/DOWN/RIGHT/UP
         </p>
         <p>Bot control function<br/>
         <span style="font-size: 0.5em;"></span>Extract the parameteres for two tanks from "e". These are: x, y, rotation, cannonRotation, velocityX, velocityY, accelerationX, accelerationY, shootCooldown.<br/>
@@ -52,7 +54,7 @@
         <p>
         <input type="checkbox" name="script-controll" id="controll-green"> Check the box to switch control to bot.<br>
         </p>
-        <p>Player controls: L;'/LEFT/DOWN/RIGHT/UP</p>
+        <p>Player controls: QWE/D/F/G/R</p>
         <p>Bot control function:<br/>
         <span style="font-size: 0.5em;"></span>Extract the parameteres for two tanks from "e". These are: x, y, rotation, cannonRotation, velocityX, velocityY, accelerationX, accelerationY, shootCooldown.<br/>
         Control your tank by constructing a "response" object which tells what actions to take: turnLeft,turnRight, goForward, goBack,shoot, cannonLeft, cannonRight.<br/></span>
@@ -89,9 +91,18 @@
 </textarea></div>-->
         </div>
     </body>
-    
+    <script>
+        function myFunction() {
+          var x = document.getElementById("myDIV");
+          if (x.style.display === "none") {
+            x.style.display = "block";
+          } else {
+            x.style.display = "none";
+          }
+        }
+        </script>
 	<script src="cannon.js"></script> 
 	<script src="tank.js"></script> 
 	<script src="bullet.js"></script> 
-	<script src="Main.js"></script> 
+	<script src="Main.js"></script>
 </html>

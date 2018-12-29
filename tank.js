@@ -90,7 +90,7 @@ class Tank {
 	}
 	
 	updateBulletList(width,height){
-		this.bulletList = this.bulletList.filter((object)=>(object.bitmap.x<=width && object.bitmap.y<=height && object.bitmap.x>=0 && object.bitmap.y>=0));
+		this.bulletList = this.bulletList.filter((object)=>(object.bitmap!=null && object.bitmap.x<=width && object.bitmap.y<=height && object.bitmap.x>=0 && object.bitmap.y>=0));
 		
 	}
 
@@ -122,6 +122,11 @@ class Tank {
 		if (index > -1) {
 			this.stage.updatableObjects.splice(index, 1);
 		}
+		this.stage.removeChild(this.bitmap);
+		this.stage.removeChild(this.cannon.bitmap);
+	}
+
+	removeDirect(){
 		this.stage.removeChild(this.bitmap);
 		this.stage.removeChild(this.cannon.bitmap);
 	}
